@@ -21,3 +21,8 @@ cp out/libui.a $GOPATH/src/github.com/andlabs/ui/libui_linux_amd64.a
 cd ${GOPATH}/src/github.com/andlabs/ui/
 go build
 ```
+
+
+### SSH config parser
+
+The following golang ssh parser is used. [ssh_config](https://github.com/kevinburke/ssh_config).
