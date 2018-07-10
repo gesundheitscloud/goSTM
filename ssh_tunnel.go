@@ -1,9 +1,6 @@
 package main
 
 import (
-	/*"log"
-	"bufio"
-	"time"*/
 	"context"
 	"os"
 	"os/user"
