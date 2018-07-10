@@ -72,7 +72,6 @@ func main() {
 func startSelectedTunnels(UIList []Tunnel) {
 	for _, tunnel := range UIList {
 		if tunnel.UIItem.Checked() {
-			// TODO: activate
 			fmt.Printf("%s\n", tunnel.Host)
 			start(tunnel.Context, tunnel.SSHConfig, tunnel.Host)
 			tunnel.UIIcon.SetText("Active")
@@ -83,7 +82,6 @@ func startSelectedTunnels(UIList []Tunnel) {
 func stopSelectedTunnels(UIList []Tunnel) {
 	for _, tunnel := range UIList {
 		if tunnel.UIItem.Checked() {
-			// TODO: disable
 			tunnel.Cancel()
 			tunnel.UIIcon.SetText("Disabled")
 		}

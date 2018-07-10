@@ -27,5 +27,19 @@ go build
 
 The following golang ssh parser is used. [ssh_config](https://github.com/kevinburke/ssh_config).
 
+Documentation can be found here [godoc](https://godoc.org/github.com/kevinburke/ssh_config).
+
+### SSH Tunnel
+
+The SSH tunnel in the ssh_tunnel.go file is inspired by this
+[gist post](https://gist.github.com/svett/5d695dcc4cc6ad5dd275)
+
+The SSH tunnel is implemented like this.
+
+* open local port and wait for connections
+* open fork for incoming connections on the local port (ssh config 'LocalForward' bind address and port)
+* this fork opens a SSH remote connection to the ssh host (ssh config 'Hostname')
+* open a remote connection on that SSH remote connection to the target host (ssh config 'LocalForward' host and hostport)
+
 ### TODOs
 [Here](TODO.md)
