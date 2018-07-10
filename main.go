@@ -1,11 +1,23 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/andlabs/ui"
 )
 
 func main() {
-	err := ui.Main(func() {
+	//TODO: make file configurable and triggered by a ui action
+	sshCfg, err := readSSHConfig(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(sshCfg.String())
+
+	err = ui.Main(func() {
 		input := ui.NewEntry()
 		button := ui.NewButton("Greet")
 		greeting := ui.NewLabel("")

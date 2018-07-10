@@ -23,6 +23,8 @@ deps: build-env
 	#go get gopkg.in/yaml.v2
 	go get github.com/mitchellh/gox
 	go get github.com/mitchellh/go-homedir
+	# ssh config parser
+	go get github.com/kevinburke/ssh_config
 
 verify:
 	echo TODO
