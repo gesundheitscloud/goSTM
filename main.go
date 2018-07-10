@@ -1,36 +1,40 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/andlabs/ui"
+	"github.com/kevinburke/ssh_config"
 )
 
 // Tunnel ...
 type Tunnel struct {
+	SSHConfig *ssh_config.Config
+	Host string
 	UIItem *ui.Checkbox
 	UIIcon *ui.Label
 }
 
 func main() {
-	//TODO: make file configurable and triggered by a ui action
-	sshCfg, err := readSSHConfig(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
-	if err != nil {
-		panic(err)
-	}
-
-	err = ui.Main(func() {
+	err := ui.Main(func() {
 		var UIList []Tunnel
 		startTunnelButton := ui.NewButton("Start")
 		stopTunnelButton := ui.NewButton("Stop")
 		box := ui.NewVerticalBox()
 		var tunnelBox *ui.Box
 
+		//TODO: make file configurable and triggered by a ui action
+		sshCfg, errSSH := readSSHConfig(filepath.Join(os.Getenv("HOME"), ".ssh", "ssh_config_example"))
+		if errSSH != nil {
+			panic(errSSH)
+		}
+
 		// Display tunnels
 		for _, host := range sshCfg.Hosts {
 			if len(host.String()) > 0 {
-				tunnel := Tunnel{ui.NewCheckbox(host.String()), ui.NewLabel("Disabled")}
+				tunnel := Tunnel{sshCfg, host.Patterns[0].String(), ui.NewCheckbox(host.String()), ui.NewLabel("Disabled")}
 				UIList = append(UIList, tunnel)
 				tunnelBox = ui.NewHorizontalBox()
 				tunnelBox.Append(tunnel.UIItem, false)
@@ -65,6 +69,9 @@ func startSelectedTunnels(UIList []Tunnel) {
 	for _, tunnel := range UIList {
 		if tunnel.UIItem.Checked() {
 			// TODO: activate
+			fmt.Printf("%s\n", tunnel.Host)
+
+			start(tunnel.SSHConfig, tunnel.Host)
 			tunnel.UIIcon.SetText("Active")
 		}
 	}
