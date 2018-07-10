@@ -1,12 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/andlabs/ui"
 )
+
+// Tunnel ...
+type Tunnel struct {
+	UIItem *ui.Checkbox
+	UIIcon *ui.Label
+}
 
 func main() {
 	//TODO: make file configurable and triggered by a ui action
@@ -15,22 +20,35 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(sshCfg.String())
-
 	err = ui.Main(func() {
-		input := ui.NewEntry()
-		button := ui.NewButton("Greet")
-		greeting := ui.NewLabel("")
+		var UIList []Tunnel
+		startTunnelButton := ui.NewButton("Start")
+		stopTunnelButton := ui.NewButton("Stop")
 		box := ui.NewVerticalBox()
-		box.Append(ui.NewLabel("Enter your name:"), false)
-		box.Append(input, false)
-		box.Append(button, false)
-		box.Append(greeting, false)
-		window := ui.NewWindow("Hello", 200, 100, false)
+		var tunnelBox *ui.Box
+
+		// Display tunnels
+		for _, host := range sshCfg.Hosts {
+			if len(host.String()) > 0 {
+				tunnel := Tunnel{ui.NewCheckbox(host.String()), ui.NewLabel("Disabled")}
+				UIList = append(UIList, tunnel)
+				tunnelBox = ui.NewHorizontalBox()
+				tunnelBox.Append(tunnel.UIItem, false)
+				tunnelBox.Append(tunnel.UIIcon, false)
+				box.Append(tunnelBox, false)
+			}
+		}
+
+		box.Append(startTunnelButton, false)
+		box.Append(stopTunnelButton, false)
+		window := ui.NewWindow("goSTM", 200, 100, false)
 		window.SetMargined(true)
 		window.SetChild(box)
-		button.OnClicked(func(*ui.Button) {
-			addTunnelWindow()
+		startTunnelButton.OnClicked(func(*ui.Button) {
+			startSelectedTunnels(UIList)
+		})
+		stopTunnelButton.OnClicked(func(*ui.Button) {
+			stopSelectedTunnels(UIList)
 		})
 		window.OnClosing(func(*ui.Window) bool {
 			ui.Quit()
@@ -43,14 +61,20 @@ func main() {
 	}
 }
 
-func addTunnelWindow() {
-	box := ui.NewVerticalBox()
-	box.Append(ui.NewLabel("Add SSH Tunnel"), false)
-	window := ui.NewWindow("Add SSH Tunnel", 200, 100, false)
-	window.SetMargined(true)
-	window.SetChild(box)
-	window.OnClosing(func(*ui.Window) bool {
-		return true
-	})
-	window.Show()
+func startSelectedTunnels(UIList []Tunnel) {
+	for _, tunnel := range UIList {
+		if tunnel.UIItem.Checked() {
+			// TODO: activate
+			tunnel.UIIcon.SetText("Active")
+		}
+	}
+}
+
+func stopSelectedTunnels(UIList []Tunnel) {
+	for _, tunnel := range UIList {
+		if tunnel.UIItem.Checked() {
+			// TODO: disable
+			tunnel.UIIcon.SetText("Disabled")
+		}
+	}
 }
