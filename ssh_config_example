@@ -1,0 +1,9 @@
+Host k8s-master-40df5e26-0 
+  Hostname 52.233.225.199
+  User gesund
+  IdentityFile ~/.ssh/id_rsa
+  DynamicForward 8080
+  ControlMaster auto
+  ControlPath ~/.ssh/sockets/%r@%h:%p
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no

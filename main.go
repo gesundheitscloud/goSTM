@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"context"
 
 	"github.com/andlabs/ui"
 	"github.com/kevinburke/ssh_config"
@@ -13,6 +14,8 @@ import (
 type Tunnel struct {
 	SSHConfig *ssh_config.Config
 	Host string
+	Context context.Context
+	Cancel context.CancelFunc
 	UIItem *ui.Checkbox
 	UIIcon *ui.Label
 }
@@ -34,7 +37,8 @@ func main() {
 		// Display tunnels
 		for _, host := range sshCfg.Hosts {
 			if len(host.String()) > 0 {
-				tunnel := Tunnel{sshCfg, host.Patterns[0].String(), ui.NewCheckbox(host.String()), ui.NewLabel("Disabled")}
+				ctx, cancel := context.WithCancel(context.Background())
+				tunnel := Tunnel{sshCfg, host.Patterns[0].String(), ctx, cancel, ui.NewCheckbox(host.String()), ui.NewLabel("Disabled")}
 				UIList = append(UIList, tunnel)
 				tunnelBox = ui.NewHorizontalBox()
 				tunnelBox.Append(tunnel.UIItem, false)
@@ -70,8 +74,7 @@ func startSelectedTunnels(UIList []Tunnel) {
 		if tunnel.UIItem.Checked() {
 			// TODO: activate
 			fmt.Printf("%s\n", tunnel.Host)
-
-			start(tunnel.SSHConfig, tunnel.Host)
+			start(tunnel.Context, tunnel.SSHConfig, tunnel.Host)
 			tunnel.UIIcon.SetText("Active")
 		}
 	}
@@ -81,6 +84,7 @@ func stopSelectedTunnels(UIList []Tunnel) {
 	for _, tunnel := range UIList {
 		if tunnel.UIItem.Checked() {
 			// TODO: disable
+			tunnel.Cancel()
 			tunnel.UIIcon.SetText("Disabled")
 		}
 	}

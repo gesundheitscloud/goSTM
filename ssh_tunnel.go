@@ -4,6 +4,7 @@ import (
 	/*"log"
 	"bufio"
 	"time"*/
+	"context"
 	"os"
 	"os/user"
 	"fmt"
@@ -36,7 +37,7 @@ type SSHtunnel struct {
 	Config *ssh.ClientConfig
 }
 
-func (tunnel *SSHtunnel) Start() error {
+func (tunnel *SSHtunnel) Start(ctx context.Context) error {
 	listener, err := net.Listen("tcp", tunnel.Local.String())
 	if err != nil {
 		return err
@@ -44,24 +45,13 @@ func (tunnel *SSHtunnel) Start() error {
 	defer listener.Close()
 
 	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			return err
-		}
-		go tunnel.forward(conn)
-	}
-}
-
-
-//TODO implements stop tunnel
-func (tunnel *SSHtunnel) Stop() error {
-	listener, err := net.Listen("tcp", tunnel.Local.String())
-	if err != nil {
-		return err
-	}
-	defer listener.Close()
-
-	for {
+		go func() {
+			select {
+	        case <-ctx.Done():
+	            listener.Close()
+	            return
+	        }
+		}()
 		conn, err := listener.Accept()
 		if err != nil {
 			return err
@@ -84,10 +74,16 @@ func (tunnel *SSHtunnel) forward(localConn net.Conn) {
 	}
 
 	copyConn:=func(writer, reader net.Conn) {
+		defer writer.Close()
+		defer reader.Close()
+
 		_, err:= io.Copy(writer, reader)
 		if err != nil {
 			fmt.Printf("io.Copy error: %s", err)
 		}
+
+		defer serverConn.Close()
+		defer remoteConn.Close()
 	}
 
 	go copyConn(localConn, remoteConn)
@@ -114,7 +110,7 @@ func PublicKeyFile(file string) (ssh.AuthMethod, error) {
 	return ssh.PublicKeys(key), nil
 }
 
-func start(sshcfg *ssh_config.Config, sshHost string) {
+func start(ctx context.Context, sshcfg *ssh_config.Config, sshHost string) {
 /*
 Hostname 52.233.225.199
   User gesund
@@ -193,7 +189,6 @@ Hostname 52.233.225.199
 	}
 
 	sshConfig := &ssh.ClientConfig{
-
 		User: username,
 		Auth: []ssh.AuthMethod{ 
 			publicKey,
@@ -213,5 +208,5 @@ Hostname 52.233.225.199
 		Remote: remoteEndpoint,
 	}
 
-	go tunnel.Start()
+	go tunnel.Start(ctx)
 }
