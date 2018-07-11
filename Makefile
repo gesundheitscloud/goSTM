@@ -16,18 +16,15 @@ build-release: build-env
 	go build -ldflags "-X main.toolVersion=$(tag_version)" -o bin/$(bin_name) .
 	chmod +x bin/$(bin_name)
 
-# TODO: install like ui deps like this: https://github.com/andlabs/ui/issues/230#issuecomment-289231075
 deps: build-env
-	#go get gopkg.in/alecthomas/kingpin.v2
-	#go get github.com/fatih/color
-	#go get gopkg.in/yaml.v2
 	go get github.com/mitchellh/gox
 	go get github.com/mitchellh/go-homedir
 	# ssh config parser
 	go get github.com/kevinburke/ssh_config
 
-verify:
-	echo TODO
+travis-test: build-snapshot
+	sudo apt-get install openssh-server
+	echo "TODO: try to connect to the ssh server with goSTM"
 
 release: deps build-release verify
 	echo -n "" > SHA256SUMS
