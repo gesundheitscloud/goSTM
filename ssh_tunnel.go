@@ -2,21 +2,22 @@ package main
 
 import (
 	"context"
-	"os"
-	"os/user"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"path/filepath"
 	"net"
-	"strings"
+	"os"
+	"os/user"
+	"path/filepath"
 	"strconv"
+	"strings"
 
+	"github.com/kevinburke/ssh_config"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
-	"github.com/kevinburke/ssh_config"
 )
 
+// Endpoint ..
 type Endpoint struct {
 	Host string
 	Port int
@@ -26,6 +27,7 @@ func (endpoint *Endpoint) String() string {
 	return fmt.Sprintf("%s:%d", endpoint.Host, endpoint.Port)
 }
 
+// SSHtunnel ..
 type SSHtunnel struct {
 	Local  *Endpoint
 	Server *Endpoint
@@ -34,6 +36,7 @@ type SSHtunnel struct {
 	Config *ssh.ClientConfig
 }
 
+// Start a ssh tunnel
 func (tunnel *SSHtunnel) Start(ctx context.Context) error {
 	listener, err := net.Listen("tcp", tunnel.Local.String())
 	if err != nil {
@@ -44,10 +47,10 @@ func (tunnel *SSHtunnel) Start(ctx context.Context) error {
 	for {
 		go func() {
 			select {
-	        case <-ctx.Done():
-	            listener.Close()
-	            return
-	        }
+			case <-ctx.Done():
+				listener.Close()
+				return
+			}
 		}()
 		conn, err := listener.Accept()
 		if err != nil {
@@ -70,11 +73,11 @@ func (tunnel *SSHtunnel) forward(localConn net.Conn) {
 		return
 	}
 
-	copyConn:=func(writer, reader net.Conn) {
+	copyConn := func(writer, reader net.Conn) {
 		defer writer.Close()
 		defer reader.Close()
 
-		_, err:= io.Copy(writer, reader)
+		_, err := io.Copy(writer, reader)
 		if err != nil {
 			fmt.Printf("io.Copy error: %s", err)
 		}
@@ -87,6 +90,7 @@ func (tunnel *SSHtunnel) forward(localConn net.Conn) {
 	go copyConn(remoteConn, localConn)
 }
 
+// SSHAgent ..
 func SSHAgent() ssh.AuthMethod {
 	if sshAgent, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK")); err == nil {
 		return ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers)
@@ -94,6 +98,7 @@ func SSHAgent() ssh.AuthMethod {
 	return nil
 }
 
+// PublicKeyFile ..
 func PublicKeyFile(file string) (ssh.AuthMethod, error) {
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -108,38 +113,38 @@ func PublicKeyFile(file string) (ssh.AuthMethod, error) {
 }
 
 func start(ctx context.Context, sshcfg *ssh_config.Config, sshHost string) {
-/*
-Hostname 52.233.225.199
-  User gesund
-  IdentityFile ~/.ssh/id_rsa
-  DynamicForward 8080
-  ControlMaster auto
-  ControlPath ~/.ssh/sockets/%r@%h:%p
-  UserKnownHostsFile /dev/null
-  StrictHostKeyChecking no
-  LocalForward 127.0.0.1:9906 127.0.0.1:3306
-*/
-  	localForward, _ := sshcfg.Get(sshHost, "LocalForward")
+	/*
+	   Hostname 52.233.225.199
+	     User gesund
+	     IdentityFile ~/.ssh/id_rsa
+	     DynamicForward 8080
+	     ControlMaster auto
+	     ControlPath ~/.ssh/sockets/%r@%h:%p
+	     UserKnownHostsFile /dev/null
+	     StrictHostKeyChecking no
+	     LocalForward 127.0.0.1:9906 127.0.0.1:3306
+	*/
+	localForward, _ := sshcfg.Get(sshHost, "LocalForward")
 
-  	if ( len(localForward) <= 0 ) {
-  		panic("Missing LocalForward ssh configuration.")
-  	}
+	if len(localForward) <= 0 {
+		panic("Missing LocalForward ssh configuration.")
+	}
 
-  	localForwards := strings.Split(localForward, " ")
+	localForwards := strings.Split(localForward, " ")
 
-  	if ( len(localForwards) < 2 ) {
-  		panic("Missing LocalForward local and remote definition.")
-  	}
+	if len(localForwards) < 2 {
+		panic("Missing LocalForward local and remote definition.")
+	}
 
-    localForward, remoteForward := localForwards[0], localForwards[1]
-    fmt.Println(localForward, remoteForward)
+	localForward, remoteForward := localForwards[0], localForwards[1]
+	fmt.Println(localForward, remoteForward)
 
-  	host, strPort, err := net.SplitHostPort(localForward)
-  	fmt.Println(host, strPort)
-  	port, err := strconv.Atoi(strPort)
-    if err != nil {
-        panic(err)
-    }
+	host, strPort, err := net.SplitHostPort(localForward)
+	fmt.Println(host, strPort)
+	port, err := strconv.Atoi(strPort)
+	if err != nil {
+		panic(err)
+	}
 	// Read hosts and users from ssh config
 	localEndpoint := &Endpoint{
 		Host: host,
@@ -154,12 +159,12 @@ Hostname 52.233.225.199
 	}
 
 	host, strPort, err = net.SplitHostPort(remoteForward)
-	
+
 	port, err = strconv.Atoi(strPort)
-    if err != nil {
-        panic(err)
-    }
-	//TODO localForwardCfg must be parsed into 
+	if err != nil {
+		panic(err)
+	}
+	//TODO localForwardCfg must be parsed into
 	//remote localfowrad [optional ip]:port dest_ip:port
 	remoteEndpoint := &Endpoint{
 		Host: host, // get from localForwardCfg
@@ -176,7 +181,7 @@ Hostname 52.233.225.199
 	if strings.HasPrefix(identityFile, "~/") {
 		usr, _ := user.Current()
 		dir := usr.HomeDir
-	    identityFile = filepath.Join(dir, identityFile[2:])
+		identityFile = filepath.Join(dir, identityFile[2:])
 	}
 
 	fmt.Println(identityFile)
@@ -187,7 +192,7 @@ Hostname 52.233.225.199
 
 	sshConfig := &ssh.ClientConfig{
 		User: username,
-		Auth: []ssh.AuthMethod{ 
+		Auth: []ssh.AuthMethod{
 			publicKey,
 		},
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
