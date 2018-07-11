@@ -19,11 +19,19 @@ build-release: build-env
 deps: build-env
 	go get github.com/mitchellh/gox
 	go get github.com/mitchellh/go-homedir
+	go get golang.org/x/crypto/ssh
 	# ssh config parser
 	go get github.com/kevinburke/ssh_config
 
-travis-test: build-snapshot
-	sudo apt-get install openssh-server
+travis-build: deps build-env
+	sudo apt-get update
+	sudo apt-get install -y pkg-config libgtk-3-dev
+	go get github.com/andlabs/ui
+	go build -ldflags "-X main.toolVersion=$(branch_version)" -o bin/$(bin_name) .
+	chmod +x bin/$(bin_name)
+
+travis-test: travis-build
+	sudo apt-get install -y openssh-server
 	echo "TODO: try to connect to the ssh server with goSTM"
 
 release: deps build-release verify

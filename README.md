@@ -1,5 +1,5 @@
 ### Status
-[![Master branch build status](https://travis-ci.com/gesundheitscloud/goSTM.svg?branch=master)](https://travis-ci.org/fishi0x01/saidumlo.svg?branch=master)
+[![Master branch build status](https://travis-ci.com/gesundheitscloud/goSTM.svg?branch=master)](https://travis-ci.com/gesundheitscloud/goSTM)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gesundheitscloud/goSTM)](https://goreportcard.com/report/github.com/gesundheitscloud/goSTM)
 
 # goSTM
