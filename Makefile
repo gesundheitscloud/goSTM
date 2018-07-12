@@ -12,6 +12,9 @@ build-snapshot: build-env
 	go build -ldflags "-X main.toolVersion=$(branch_version)" -o bin/$(bin_name) .
 	chmod +x bin/$(bin_name)
 
+start-latest: build-snapshot
+	bin/goSTM
+
 build-release: build-env
 	go build -ldflags "-X main.toolVersion=$(tag_version)" -o bin/$(bin_name) .
 	chmod +x bin/$(bin_name)

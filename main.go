@@ -1,10 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
-	"context"
 
 	"github.com/andlabs/ui"
 	"github.com/kevinburke/ssh_config"
@@ -13,11 +13,11 @@ import (
 // Tunnel ...
 type Tunnel struct {
 	SSHConfig *ssh_config.Config
-	Host string
-	Context context.Context
-	Cancel context.CancelFunc
-	UIItem *ui.Checkbox
-	UIIcon *ui.Label
+	Host      string
+	Context   context.Context
+	Cancel    context.CancelFunc
+	UIItem    *ui.Checkbox
+	UIIcon    *ui.Label
 }
 
 func main() {

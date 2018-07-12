@@ -61,6 +61,7 @@ func (tunnel *SSHtunnel) Start(ctx context.Context) error {
 }
 
 func (tunnel *SSHtunnel) forward(localConn net.Conn) {
+	fmt.Printf("Dial to %s", tunnel.Server.String())
 	serverConn, err := ssh.Dial("tcp", tunnel.Server.String(), tunnel.Config)
 	if err != nil {
 		fmt.Printf("Server dial error: %s\n", err)
@@ -114,7 +115,8 @@ func PublicKeyFile(file string) (ssh.AuthMethod, error) {
 
 func start(ctx context.Context, sshcfg *ssh_config.Config, sshHost string) {
 	/*
-	   Hostname 52.233.225.199
+	   Host my-tunnel
+	     Hostname 52.233.225.199
 	     User gesund
 	     IdentityFile ~/.ssh/id_rsa
 	     DynamicForward 8080
@@ -202,6 +204,8 @@ func start(ctx context.Context, sshcfg *ssh_config.Config, sshHost string) {
 			SSHAgent(),
 		},*/
 	}
+
+	fmt.Println()
 
 	tunnel := &SSHtunnel{
 		Config: sshConfig,
