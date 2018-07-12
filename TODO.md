@@ -12,3 +12,7 @@
 
 ## Stability
 - Travis CI
+
+## Possible Features
+- Integration with vault: get ssh private key from vault
+- Read ssh_config from url
