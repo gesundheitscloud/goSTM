@@ -6,6 +6,7 @@
 
 ## Usability
 - `ssh_config` read from custom location
+- allow github tokens for private repos
 
 ## Security
 - Verify host key from `known_hosts`
@@ -15,4 +16,3 @@
 
 ## Possible Features
 - Integration with vault: get ssh private key from vault
-- Read ssh_config from url

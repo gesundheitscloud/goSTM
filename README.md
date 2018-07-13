@@ -6,6 +6,14 @@
 
 This is an early MVP.
 
+## Motivation
+
+- port unmaintained [gSTM](https://sourceforge.net/projects/gstm/) to golang to make it work across multiple platforms
+- have quick overview of active tunnels
+- use remote configs (e.g., from github) quickly across multiple platforms
+- depless -> not even ssh itself is required
+- potentially hook up with vault to use temporary ssh key
+
 ## Dev
 
 ### Install andlabs/ui
