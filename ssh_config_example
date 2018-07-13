@@ -1,9 +1,6 @@
-Host k8s-master-40df5e26-0 
-  Hostname 52.233.225.199
+Host test-tunnel
+  Hostname 40.115.10.83
   User gesund
-  IdentityFile ~/.ssh/id_rsa
-  DynamicForward 8080
-  ControlMaster auto
-  ControlPath ~/.ssh/sockets/%r@%h:%p
-  UserKnownHostsFile /dev/null
-  StrictHostKeyChecking no
+  IdentityFile ~/.ssh/test
+  LocalForward 127.0.0.1:8080 127.0.0.1:80
+ 
