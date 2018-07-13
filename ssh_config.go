@@ -1,18 +1,16 @@
 package main
 
 import (
-	"os"
+
 	//"fmt"
+
+	"io"
 
 	"github.com/kevinburke/ssh_config"
 )
 
-func readSSHConfig(cfgFile string) (*ssh_config.Config, error) {
-	f, err := os.Open(cfgFile)
-	if err != nil {
-		panic(err)
-	}
-	cfg, err2 := ssh_config.Decode(f)
+func readSSHConfig(cfgFile io.Reader) (*ssh_config.Config, error) {
+	cfg, err2 := ssh_config.Decode(cfgFile)
 	/*for _, host := range cfg.Hosts {
 		fmt.Println("patterns:", host.Patterns)
 		for _, node := range host.Nodes {
