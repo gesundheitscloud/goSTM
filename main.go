@@ -1,14 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/andlabs/ui"
 	"github.com/kevinburke/ssh_config"
@@ -84,33 +78,28 @@ func main() {
 func getConfig() {
 	var sshCfg *ssh_config.Config
 	if goSTMUI.ConfigField.Text() == "" {
-		fmt.Println("Read config from default")
-		freader, ferr := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "ssh_config_example"))
-		if ferr != nil {
-			panic(ferr)
-		}
 		var serr error
-		sshCfg, serr = readSSHConfig(bufio.NewReader(freader))
+		sshCfg, serr = getDefaultConfig()
 		if serr != nil {
 			panic(serr)
 		}
 	} else {
-		// TODO: check if URL or local path
-		resp, herr := http.Get(goSTMUI.ConfigField.Text())
-		if herr != nil {
-			panic(herr)
-		}
-		defer resp.Body.Close()
-		cfgBytes, rerr := ioutil.ReadAll(resp.Body)
-		if rerr != nil {
-			panic(rerr)
-		}
-		cfg := string(cfgBytes)
-		fmt.Println(cfg)
-		var serr error
-		sshCfg, serr = readSSHConfig(strings.NewReader(cfg))
-		if serr != nil {
-			panic(serr)
+		if isValidURL(goSTMUI.ConfigField.Text()) {
+			// This seems to be an URL
+			fmt.Println("Get config from URL")
+			var serr error
+			sshCfg, serr = getConfigFromURL()
+			if serr != nil {
+				panic(serr)
+			}
+		} else {
+			// This should be a local path
+			fmt.Println("Get config from local path")
+			var serr error
+			sshCfg, serr = getConfigFromLocalPath()
+			if serr != nil {
+				panic(serr)
+			}
 		}
 	}
 	displayTunnels(sshCfg)
