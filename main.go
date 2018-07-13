@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/andlabs/ui"
 	"github.com/kevinburke/ssh_config"
@@ -45,7 +47,7 @@ func main() {
 
 		goSTMUI = GoSTMUI{tunnelListParentBox, nil, nil, configEntry}
 
-		//configEntry.SetText("https://raw.githubusercontent.com/gesundheitscloud/goSTM/master/ssh_config_example")
+		configEntry.SetText(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
 		getConfig()
 
 		box.Append(configEntry, false)
