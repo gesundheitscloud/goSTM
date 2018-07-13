@@ -4,3 +4,8 @@ Host test-tunnel
   IdentityFile ~/.ssh/test
   LocalForward 127.0.0.1:8080 127.0.0.1:80
  
+Host more-test-tunnels
+  Hostname 40.115.11.93
+  User gesund
+  IdentityFile ~/.ssh/test
+  LocalForward 127.0.0.1:8080 127.0.0.1:80
